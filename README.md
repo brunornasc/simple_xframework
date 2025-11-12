@@ -1,0 +1,1 @@
+Por volta de 2010 eu programava em .Net, gostei tanto da simplicidade do retained gui que comecei a criar um clone nativo linux usando x11 para fins educacionais, tanto que este código é o mesmo de 2010, achado nos cds de perdidos.
