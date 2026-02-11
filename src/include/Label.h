@@ -3,16 +3,16 @@
 #include "Types.h"
 #include <X11/Xlib.h>
 #include <string>
-
 #include "Component.h"
-#include "Form.h"
+
+#ifndef LABEL_H_
 
 namespace System {
+    class Form;
+
     class Label : public Component {
     private:
-        Display *display;
-        int screen;
-        Window parent;
+        Form *parent;
         GC gc;
         XFontStruct *fontInfo;
         unsigned long foregroundColor;
@@ -23,14 +23,26 @@ namespace System {
         std::string text;
         char *color;
 
-        Label(Display *display, Window parent, int screen);
         template<typename T>
-        Label(const T* form) : Label(form->getDisplay(), form->getWindow(), form->getScreen()) {}
+        Label(const T* form) {
+            this->parent = static_cast<Form*>(const_cast<T*>(form));
+
+            this->location = new System::Location();
+            this->size = new System::Size();
+            this->location->left = 0;
+            this->location->top = 0;
+            this->size->width = 100;
+            this->size->height = 20;
+        }
+
         ~Label() override;
 
         void setText(const std::string &text);
         void setLocation(int x, int y);
         void setSize(int width, int height);
         void draw() override;
+        void create() override;
     };
 }
+
+#endif

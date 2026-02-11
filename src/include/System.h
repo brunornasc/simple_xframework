@@ -1,12 +1,9 @@
 #pragma once
 #include "X11/Xlib.h"
 #include <string>
-
 #include "Form.h"
-#include "Object.h"
-#include "EventHandlers.h"
-#include "Types.h"
 
+#ifndef SYSTEM_H_
 #define SYSTEM_H_
 
 //__SYSTEM__H
@@ -25,3 +22,5 @@ namespace System {
         }
     }
 }
+
+#endif

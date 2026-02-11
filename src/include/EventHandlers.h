@@ -27,7 +27,7 @@ namespace System {
         MemberFunction m_memberFunction;
         
     public:
-        MouseEventHandler(const MemberFunction memberFunction) : m_instance(nullptr),
+        MouseEventHandler(C *instance, const MemberFunction memberFunction) : m_instance(instance),
                                                             m_memberFunction(memberFunction) { }
         
         void execute(System::MouseEventArgs* e) override {
@@ -45,7 +45,7 @@ namespace System {
 
         
     public:
-        KeyEventHandler(const MemberFunction memberFunction): m_instance(nullptr),
+        KeyEventHandler(C *instance, const MemberFunction memberFunction): m_instance(instance),
                                                             m_memberFunction(memberFunction) { }
       
         void execute(System::KeyEventArgs* e) override {
@@ -63,7 +63,7 @@ namespace System {
 
         
         public:
-        WindowEventHandler(const MemberFunction memberFunction) : m_instance(nullptr),
+        WindowEventHandler(C *instance, const MemberFunction memberFunction) : m_instance(instance),
                                                             m_memberFunction(memberFunction) { }
       
         void execute(System::EventArgs* e) override {

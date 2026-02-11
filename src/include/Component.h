@@ -10,6 +10,7 @@ namespace System {
     class Component : public Object {
     public:
         virtual void draw() = 0;
+        virtual void create() = 0;
         virtual ~Component() = default;
     };
 }

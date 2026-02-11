@@ -4,11 +4,10 @@
 
 #include "include/Form.h"
 #include "include/System.h"
+#include "include/Component.h"
 #include <X11/Xutil.h>
-#include <cstdlib>
 
 namespace System {
-
     std::string CurrentDesktopEnvironment;
 
     void Form::init() {
@@ -16,7 +15,6 @@ namespace System {
     }
 
     Form::Form() {
-        
         this->OnExpose = nullptr;
         this->OnDestroy = nullptr;
         this->OnConfigureNotify = nullptr;
@@ -44,18 +42,33 @@ namespace System {
 
         this->display = XOpenDisplay(nullptr);
         this->screen = DefaultScreen(this->display);
+    }
 
+    Form::~Form() {
+        for (auto component : components) {
+            delete component;
+        }
+
+        components.clear();
+
+        if (this->display) {
+            XCloseDisplay(this->display);
+            this->display = nullptr;
+        }
+
+        delete this->size;
+        delete this->location;
     }
 
     void Form::create() {
         Form::init();
+        this->initializeComponent();
 
-        // Create window first so initializeComponent can use it
         this->window = XCreateSimpleWindow(this->display, RootWindow(this->display, this->screen),
             this->location->left, this->location->top, this->size->width, this->size->height, 1,
                 BlackPixel(this->display, this->screen), WhitePixel(this->display, this->screen));
 
-        this->initializeComponent();
+        this->createComponents();
 
         //Prevent error on close window
         Atom delWindow = XInternAtom(this->display, "WM_DELETE_WINDOW", 0);
@@ -78,12 +91,10 @@ namespace System {
                 ButtonReleaseMask |
                 KeyPressMask |
                 KeyReleaseMask);
-                
-        this->windowEventHandler();
     }
 
-    Form::~Form() {
-        this->Form::dispose();
+    void Form::run() {
+        this->windowEventHandler();
     }
 
     void Form::windowEventHandler() {
@@ -174,14 +185,28 @@ namespace System {
 
     void Form::setBackgroundColor(unsigned long color) {
         XSetWindowBackground(this->display, this->window, color);
-        XClearWindow(this->display, this->window);
+        XClearArea(this->display, this->window, 0, 0, 0, 0, True);
     }
 
     void Form::setBackgroundColor(char *color) {
+        if (!this->display) {
+            std::cerr << "Erro: Display não inicializado!" << std::endl;
+            return;
+        }
+
         XColor xcolor;
         Colormap colormap = DefaultColormap(this->display, this->screen);
-        XParseColor(this->display, colormap, color, &xcolor);
-        XAllocColor(this->display, colormap, &xcolor);
+
+        if (!XParseColor(this->display, colormap, color, &xcolor)) {
+            std::cerr << "Erro: Não foi possível parsear a cor: " << color << std::endl;
+            return;
+        }
+
+        if (!XAllocColor(this->display, colormap, &xcolor)) {
+            std::cerr << "Erro: Não foi possível alocar a cor: " << color << std::endl;
+            return;
+        }
+
         this->setBackgroundColor(xcolor.pixel);
     }
 
@@ -206,6 +231,12 @@ namespace System {
 
     void Form::addComponent(Component *component) {
         this->components.push_back(component);
+    }
+
+    void Form::createComponents() const {
+        for (const auto component : components) {
+            component->create();
+        }
     }
 
 }

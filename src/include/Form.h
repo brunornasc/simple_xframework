@@ -6,7 +6,6 @@
 #include "Types.h"
 #include "Object.h"
 #include "EventHandlers.h"
-#include "Label.h"
 
 #ifndef DEBUG_H_
     #include "Debug.h"
@@ -16,6 +15,7 @@
 #define FORM_H_
 
 namespace System {
+    class Component;
 
     class Form : public Object {
     friend class Component;
@@ -29,7 +29,9 @@ namespace System {
         void destroy() const;
         static void init();
 
-    public:
+    void createComponents() const;
+
+public:
         std::vector<Component*> components;
         System::Location *location;
         System::Size *size;
@@ -56,6 +58,7 @@ namespace System {
         Display* getDisplay() const { return display; }
         Window getWindow() const { return window; }
         int getScreen() const { return screen; }
+        void run();
 
         System::EventHandler *OnExpose;
         System::EventHandler *OnDestroy;
