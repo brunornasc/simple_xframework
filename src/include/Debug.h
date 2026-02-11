@@ -1,12 +1,14 @@
+#pragma once
+
 #include <iostream>
 
-#ifndef __DEBUG_H__
-#define __DEBUG_H__
+#ifndef DEBUG_H_
+#define DEBUG_H_
 
 namespace System {
     class Debug {
         public:
-        static void Print(char *c) {
+        static void print(char *c) {
             std::cout << c << std::endl;
         }
     };

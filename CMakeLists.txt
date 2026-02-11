@@ -6,13 +6,18 @@ set(CMAKE_CXX_STANDARD 14)
 find_package(X11 REQUIRED)
 
 add_executable(simple_xframework
-        System/Debug.h
-        System/EventHandlers.h
-        System/Form.h
-        System/Object.h
-        System/System.h
-        System/Types.h
-        teste.cpp)
+        src/include/Debug.h
+        src/include/EventHandlers.h
+        src/include/Form.h
+        src/include/Object.h
+        src/include/System.h
+        src/include/Types.h
+        src/include/Component.h
+        teste.cpp
+        src/Form.cpp
+        src/Label.cpp
+
+)
 
 target_link_libraries(simple_xframework PRIVATE ${X11_LIBRARIES})
 target_include_directories(simple_xframework PRIVATE ${X11_INCLUDE_DIRS})

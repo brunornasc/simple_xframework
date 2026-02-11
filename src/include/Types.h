@@ -1,6 +1,9 @@
+#pragma once
+
 #include "X11/Xlib.h"
 
-#ifndef __TYPES_H__
+#ifndef TYPES_H_
+#define TYPES_H_
 
 namespace System {
     typedef XEvent EventArgs;
@@ -8,15 +11,13 @@ namespace System {
     typedef XButtonEvent MouseEventArgs;
 
     struct Location {
-        signed int Left;
-        signed int Top;
+        signed int left;
+        signed int top;
     };
 
     struct Size {
-        unsigned int Width;
-        unsigned int Height;
+        unsigned int width;
+        unsigned int height;
     };
 }
-
-#define __TYPES_H__
 #endif

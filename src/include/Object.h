@@ -1,14 +1,16 @@
-#ifndef __OBJECT_H__
-
+#ifndef OBJECT_H_
+#define OBJECT_H_
 namespace System {
 
     class Object {
-        virtual bool Equals(Object *o) {
+    public:
+        virtual ~Object() = default;
+        virtual bool equals(Object *o) {
             if (o == this) return true;
             return false;
         }
         
     };
 }
-#define __OBJECT_H__
+
 #endif

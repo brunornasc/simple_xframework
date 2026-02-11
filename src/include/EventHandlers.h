@@ -1,75 +1,76 @@
 //retirado de https://blog.molecular-matters.com/2011/09/19/generic-type-safe-delegates-and-events-in-c/
 
+#pragma once
+
 #include "Types.h"
 
-#ifndef __EVENT_HANDLERS_H__
-#define __EVENT_HANDLERS_H__
+#ifndef EVENT_HANDLERS_H_
+#define EVENT_HANDLERS_H_
 
 namespace System {
 
   class EventHandler {
     public:
-    virtual void Execute(System::MouseEventArgs* e) {};
-    virtual void Execute(System::KeyEventArgs* e) {};
-    virtual void Execute(System::EventArgs* e) {};
+        virtual void execute(System::MouseEventArgs* e) {}
+        virtual void execute(System::KeyEventArgs* e) {}
+        virtual void execute(System::EventArgs* e) {}
+        virtual ~EventHandler() = default;
     };
     
 #pragma region EventHandlers
 
     template <class C>
     class MouseEventHandler : public EventHandler {
+    private:
         typedef void (C::*MemberFunction)(System::MouseEventArgs*);
-        
-        public:
-        MouseEventHandler(MemberFunction memberFunction)   {
-            m_memberFunction = memberFunction;
-        }
-        
-        virtual void Execute(System::MouseEventArgs* e) {
-            (m_instance->*m_memberFunction)(e);
-        }
-        
-        private:
         C* m_instance;
         MemberFunction m_memberFunction;
+        
+    public:
+        MouseEventHandler(const MemberFunction memberFunction) : m_instance(nullptr),
+                                                            m_memberFunction(memberFunction) { }
+        
+        void execute(System::MouseEventArgs* e) override {
+            (m_instance->*m_memberFunction)(e);
+        }
+
     };
 
     template <class C>
     class KeyEventHandler : public EventHandler {
+    private:
         typedef void (C::*MemberFunction)(System::KeyEventArgs*);
-        
-        public:
-        KeyEventHandler(MemberFunction memberFunction)   {
-            m_memberFunction = memberFunction;
-        }
-      
-        virtual void Execute(System::KeyEventArgs* e) {
-            (m_instance->*m_memberFunction)(e);
-        }
-        
-        private:
         C* m_instance;
         MemberFunction m_memberFunction;
+
+        
+    public:
+        KeyEventHandler(const MemberFunction memberFunction): m_instance(nullptr),
+                                                            m_memberFunction(memberFunction) { }
+      
+        void execute(System::KeyEventArgs* e) override {
+            (m_instance->*m_memberFunction)(e);
+        }
+
     };
 
     template <class C>
     class WindowEventHandler : public EventHandler {
+    private:
         typedef void (C::*MemberFunction)(System::EventArgs*);
-        
-        public:
-        WindowEventHandler(MemberFunction memberFunction)   {
-            m_memberFunction = memberFunction;
-        }
-      
-        virtual void Execute(System::EventArgs* e) {
-            (m_instance->*m_memberFunction)(e);
-        }
-        
-        private:
         C* m_instance;
         MemberFunction m_memberFunction;
-    };
 
+        
+        public:
+        WindowEventHandler(const MemberFunction memberFunction) : m_instance(nullptr),
+                                                            m_memberFunction(memberFunction) { }
+      
+        void execute(System::EventArgs* e) override {
+            (m_instance->*m_memberFunction)(e);
+        }
+
+    };
 
 
 #pragma endregion
