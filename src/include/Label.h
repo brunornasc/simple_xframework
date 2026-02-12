@@ -11,18 +11,7 @@ namespace System {
     class Form;
 
     class Label : public Component {
-    private:
-        Form *parent;
-        GC gc;
-        XFontStruct *fontInfo;
-        unsigned long foregroundColor;
-
     public:
-        System::Location *location;
-        System::Size *size;
-        std::string text;
-        char *color;
-
         template<typename T>
         Label(const T* form) {
             this->parent = static_cast<Form*>(const_cast<T*>(form));
@@ -42,6 +31,10 @@ namespace System {
         void setSize(int width, int height);
         void draw() override;
         void create() override;
+        int getLeft() override { return location->left; }
+        int getTop() override { return location->top; }
+        int getWidth() override { return size->width; }
+        int getHeight() override { return size->height; }
     };
 }
 

@@ -121,6 +121,7 @@ namespace System {
 
     void Form::windowEventHandler() {
         EventArgs e;
+        static Component* lastHovered = nullptr;
 
         XNextEvent(this->display, &e);
 
@@ -138,35 +139,51 @@ namespace System {
                     }
                 break;
 
-                case ButtonPress:
-                    if(this->OnMouseClick != nullptr)
-                        this->OnMouseClick->execute(&e.xbutton);
-                break;
+                case MotionNotify: {
+                    int x = e.xmotion.x;
+                    int y = e.xmotion.y;
 
-                // case UnmapNotify: //Minimize
-                //
-                // break;
-                //
-                // case MapNotify: // Restore
-                //
-                // break;
-                //
-                // case ConfigureNotify: //Move/Resize
-                //
-                // break;
+                    Component* currentHovered = getComponentAt(x, y);
 
-                case MotionNotify:
-                    if(this->OnMouseOver != nullptr)
+                    if (currentHovered != lastHovered) {
+                        if (lastHovered) {
+                            lastHovered->_onMouseLeave();
+                        }
+                        if (currentHovered) {
+                            currentHovered->_onMouseEnter();
+                        }
+                        lastHovered = currentHovered;
+                    }
+
+                    if (currentHovered) {
+                        currentHovered->_onMouseMove(&e.xbutton);
+                    }
+                    else if (this->OnMouseOver != nullptr) {
                         this->OnMouseOver->execute(&e);
+                    }
 
-                break;
+                    break;
+                }
+
+                case ButtonPress: {
+                    Component* clicked = getComponentAt(e.xbutton.x, e.xbutton.y);
+
+                    if (clicked) {
+                        clicked->_onMousePress(&e.xbutton);
+
+                    } else if (this->OnMouseClick != nullptr) {
+                        this->OnMouseClick->execute(&e.xbutton);
+
+                    }
+
+                    break;
+                }
 
                 default:
                     break;
             }
             
             XNextEvent(this->display, &e);
-            //cout << e.type << endl;
         }
         
         this->destroy();
@@ -198,10 +215,13 @@ namespace System {
 
     void Form::setVisible(const bool _v) {
          this->visible = _v;
+
          if (_v) {
              XMapWindow(this->display, this->window);
+
          } else {
              XUnmapWindow(this->display, this->window);
+
          }
     }
 
@@ -259,6 +279,21 @@ namespace System {
         for (const auto component : components) {
             component->create();
         }
+    }
+
+    Component* Form::getComponentAt(int x, int y) {
+        for (auto it = components.rbegin(); it != components.rend(); ++it) {
+            Component* comp = *it;
+
+            // Verifica se o ponto está dentro do componente
+            if (x >= comp->getLeft() &&
+                x <= comp->getLeft() + comp->getWidth() &&
+                y >= comp->getTop() &&
+                y <= comp->getTop() + comp->getHeight()) {
+                return comp;
+                }
+        }
+        return nullptr;
     }
 
 }

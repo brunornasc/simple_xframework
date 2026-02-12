@@ -23,6 +23,7 @@ namespace System {
     unsigned long windowBgColor;
     unsigned long windowFgColor;
     bool colorsAllocated;
+    Component* hoveredComponent;
 
     protected:
         bool visible;
@@ -63,6 +64,7 @@ public:
         Window getWindow() const { return window; }
         int getScreen() const { return screen; }
         void run();
+        Component* getComponentAt(int x, int y);
 
         System::EventHandler *OnExpose;
         System::EventHandler *OnDestroy;

@@ -12,23 +12,21 @@
 
 namespace System {
     class Button : public Component {
-        Form *parent;
-        GC gc;
-        XFontStruct *fontInfo;
-        std::string text;
-        System::Location *location;
-        System::Size *size;
-        bool pressed;
-        bool hover;
         unsigned long buttonBgColor;
         unsigned long buttonHoverColor;
         unsigned long buttonTextColor;
-        bool colorsAllocated;
+        bool hovered;
 
     public:
+        System::EventHandler *onClick = nullptr;
+        System::EventHandler *onMouseMove = nullptr;
+
         template<typename T>
-        Button(const T *form) : pressed(false), hover(false), colorsAllocated(false) {
+        Button(const T *form) {
             this->parent = static_cast<Form *>(const_cast<T *>(form));
+            this->pressed = false;
+            this->hover = false;
+            this->colorsAllocated = false;
             this->location = new System::Location();
             this->size = new System::Size();
 
@@ -154,6 +152,37 @@ namespace System {
 
         bool isPressed() const { return pressed; }
         void setHover(bool h) { hover = h; }
+
+        int getLeft() override { return location->left; }
+        int getTop() override { return location->top; }
+        int getWidth() override { return size->width; }
+        int getHeight() override { return size->height; }
+
+        void _onMouseEnter() override {
+            hovered = true;
+            // Força redesenho para mostrar hover
+            XClearArea(parent->getDisplay(), parent->getWindow(),
+                      location->left, location->top,
+                      size->width, size->height, True);
+        }
+
+        void _onMouseLeave() override {
+            hovered = false;
+            // Força redesenho para remover hover
+            XClearArea(parent->getDisplay(), parent->getWindow(),
+                      location->left, location->top,
+                      size->width, size->height, True);
+        }
+
+        void _onMousePress(MouseEventArgs *event) override {
+            if (this->onClick != nullptr)
+                this->onClick->execute(event);
+        }
+
+        void _onMouseMove(MouseEventArgs *event) override {
+            if (this->onMouseMove != nullptr)
+                this->onMouseMove->execute(event);
+        }
     };
 }
 #endif
