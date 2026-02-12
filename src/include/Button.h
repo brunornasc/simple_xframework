@@ -1,33 +1,39 @@
 #pragma once
 
 #include "Component.h"
+#include "Form.h"
+#include "theme/ThemeManager.h"
 #include <string>
 
-#include "theme/ThemeManager.h"
+#include "utils/Utils.h"
+
+#ifndef BUTTON_H_
+#define BUTTON_H_
 
 namespace System {
-    class Theme;
-
     class Button : public Component {
-    private:
-        Form* parent;
+        Form *parent;
         GC gc;
-        XFontStruct* fontInfo;
+        XFontStruct *fontInfo;
         std::string text;
-        System::Location* location;
-        System::Size* size;
+        System::Location *location;
+        System::Size *size;
         bool pressed;
         bool hover;
+        unsigned long buttonBgColor;
+        unsigned long buttonHoverColor;
+        unsigned long buttonTextColor;
+        bool colorsAllocated;
 
     public:
         template<typename T>
-        Button(const T* form) : pressed(false), hover(false) {
-            this->parent = static_cast<Form*>(const_cast<T*>(form));
+        Button(const T *form) : pressed(false), hover(false), colorsAllocated(false) {
+            this->parent = static_cast<Form *>(const_cast<T *>(form));
             this->location = new System::Location();
             this->size = new System::Size();
 
-            // Aplica tema
-            Theme* theme = ThemeManager::getCurrentTheme();
+            // Pega DADOS do tema, não renderização
+            Theme *theme = ThemeManager::getCurrentTheme();
             this->size->width = theme->getButtonWidth();
             this->size->height = theme->getButtonHeight();
             this->location->left = 0;
@@ -43,62 +49,111 @@ namespace System {
             delete size;
         }
 
-        void setText(const std::string& text) {
-            this->text = text;
-        }
+        void setText(const std::string &text) { this->text = text; }
 
         void setLocation(int x, int y) {
-            this->location->left = x;
-            this->location->top = y;
+            location->left = x;
+            location->top = y;
         }
 
         void setSize(int width, int height) {
-            this->size->width = width;
-            this->size->height = height;
+            size->width = width;
+            size->height = height;
         }
 
         void create() override {
-            this->gc = XCreateGC(parent->getDisplay(), parent->getWindow(), 0, nullptr);
+            Display *dpy = parent->getDisplay();
+            Window win = parent->getWindow();
+            int screen = parent->getScreen();
+            Colormap cmap = DefaultColormap(dpy, screen);
 
-            Theme* theme = ThemeManager::getCurrentTheme();
-            std::string fontName = theme->getFontName() + "-" + std::to_string(theme->getFontSize());
+            this->gc = XCreateGC(dpy, win, 0, nullptr);
 
-            this->fontInfo = XLoadQueryFont(parent->getDisplay(), fontName.c_str());
-            if (!this->fontInfo) {
-                this->fontInfo = XLoadQueryFont(parent->getDisplay(), "fixed");
+            Theme *theme = ThemeManager::getCurrentTheme();
+
+            XColor xcolor;
+
+            Utils::parseXColor(&xcolor, theme->getButtonBackgroundColor());
+
+            if (!XAllocColor(dpy, cmap, &xcolor)) {
+                std::cerr << "FALHA ao alocar BG! Usando fallback" << std::endl;
+                buttonBgColor = WhitePixel(dpy, screen);
+
+            } else {
+                buttonBgColor = xcolor.pixel;
+
             }
 
+            Utils::parseXColor(&xcolor, theme->getButtonTextColor());
+
+            if (!XAllocColor(dpy, cmap, &xcolor)) {
+                std::cerr << "FALHA ao alocar Text! Usando fallback" << std::endl;
+                buttonTextColor = BlackPixel(dpy, screen);
+
+            } else {
+                buttonTextColor = xcolor.pixel;
+
+            }
+
+            // Hover: #3daee9
+            Utils::parseXColor(&xcolor, theme->getButtonHoverColor());
+
+            if (!XAllocColor(dpy, cmap, &xcolor)) {
+                std::cerr << "FALHA ao alocar Hover! Usando fallback" << std::endl;
+                buttonHoverColor = buttonBgColor;
+            } else {
+                buttonHoverColor = xcolor.pixel;
+
+            }
+
+            // Fonte
+            std::string fontName = theme->getFontName();
+            this->fontInfo = XLoadQueryFont(dpy, fontName.c_str());
+            if (!this->fontInfo) {
+                this->fontInfo = XLoadQueryFont(dpy, "fixed");
+            }
             if (this->fontInfo) {
-                XSetFont(parent->getDisplay(), this->gc, this->fontInfo->fid);
+                XSetFont(dpy, this->gc, this->fontInfo->fid);
             }
         }
 
         void draw() override {
-            Theme* theme = ThemeManager::getCurrentTheme();
-            theme->drawButton(
-                parent->getDisplay(),
-                parent->getWindow(),
-                gc,
-                this->fontInfo,
-                location->left,
-                location->top,
-                size->width,
-                size->height,
-                text,
-                pressed
-            );
+            if (!parent || !parent->getDisplay() || !parent->getWindow()) return;
+
+            Display *dpy = parent->getDisplay();
+            Window win = parent->getWindow();
+
+            // Desenha fundo - USA A COR ALOCADA!
+            XSetForeground(dpy, gc, buttonBgColor);
+            XFillRectangle(dpy, win, gc,
+                           location->left, location->top,
+                           size->width, size->height);
+
+            // Desenha texto - USA A COR ALOCADA!
+            if (fontInfo && !text.empty()) {
+                int textWidth = XTextWidth(fontInfo, text.c_str(), text.length());
+                int textX = location->left + (size->width - textWidth) / 2;
+                int textY = location->top + (size->height + fontInfo->ascent - fontInfo->descent) / 2;
+
+                XSetForeground(dpy, gc, buttonTextColor);
+                XSetFont(dpy, gc, fontInfo->fid);
+                XDrawString(dpy, win, gc,
+                            textX, textY,
+                            text.c_str(), text.length());
+            }
         }
 
         void setPressed(bool p) {
             if (pressed != p) {
                 pressed = p;
-                // Força redesenho
                 XClearArea(parent->getDisplay(), parent->getWindow(),
-                          location->left, location->top,
-                          size->width, size->height, True);
+                           location->left, location->top,
+                           size->width, size->height, True);
             }
         }
 
         bool isPressed() const { return pressed; }
+        void setHover(bool h) { hover = h; }
     };
 }
+#endif

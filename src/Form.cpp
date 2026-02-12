@@ -2,10 +2,11 @@
 // Created by bruno on 11/02/2026.
 //
 
+#include <X11/Xutil.h>
 #include "include/Form.h"
 #include "include/System.h"
 #include "include/Component.h"
-#include <X11/Xutil.h>
+#include "include/utils/Utils.h"
 
 namespace System {
 
@@ -14,6 +15,11 @@ namespace System {
     }
 
     Form::Form() {
+        this->display = XOpenDisplay(nullptr);
+        this->screen = DefaultScreen(this->display);
+        this->windowBgColor = WhitePixel(this->display, this->screen);
+        this->windowFgColor = BlackPixel(this->display, this->screen);
+        this->colorsAllocated = false;
         this->OnExpose = nullptr;
         this->OnDestroy = nullptr;
         this->OnConfigureNotify = nullptr;
@@ -28,19 +34,13 @@ namespace System {
         this->OnMouseClick = nullptr;
         this->OnMouseRelease = nullptr;
         this->OnMouseOver = nullptr;
-
         this->size = new System::Size();
         this->location = new System::Location();
         this->location->left = 0;
         this->location->top = 0;
-
         this->size->height = 150;
         this->size->width = 150;
-        
         this->visible = true;
-
-        this->display = XOpenDisplay(nullptr);
-        this->screen = DefaultScreen(this->display);
     }
 
     Form::~Form() {
@@ -62,10 +62,33 @@ namespace System {
     void Form::create() {
         Form::init();
         this->initializeComponent();
+        Theme* theme = ThemeManager::getCurrentTheme();
+        Display* dpy = this->display;
+        int scr = this->screen;
+        Colormap cmap = DefaultColormap(dpy, scr);
 
-        this->window = XCreateSimpleWindow(this->display, RootWindow(this->display, this->screen),
-            this->location->left, this->location->top, this->size->width, this->size->height, 1,
-                BlackPixel(this->display, this->screen), WhitePixel(this->display, this->screen));
+        // Window Background
+        unsigned long themeBg = theme->getWindowBackgroundColor();
+        XColor xcolor;
+        Utils::parseXColor(&xcolor, themeBg);
+
+        if (!XAllocColor(dpy, cmap, &xcolor)) {
+            std::cerr << "FALHA ao alocar cor de fundo! Usando fallback" << std::endl;
+            this->windowBgColor = WhitePixel(dpy, scr);
+
+        } else {
+            this->windowBgColor = xcolor.pixel;
+
+        }
+
+        this->window = XCreateSimpleWindow(
+            this->display,
+            RootWindow(this->display, this->screen),
+            this->location->left, this->location->top,
+            this->size->width, this->size->height, 1,
+            BlackPixel(this->display, this->screen),
+            this->windowBgColor
+        );
 
         this->createComponents();
 

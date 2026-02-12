@@ -20,6 +20,10 @@ namespace System {
     class Form : public Object {
     friend class Component;
 
+    unsigned long windowBgColor;
+    unsigned long windowFgColor;
+    bool colorsAllocated;
+
     protected:
         bool visible;
         Display *display;

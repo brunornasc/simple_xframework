@@ -36,9 +36,7 @@ public:
 
 int main() {
     auto *app = new Janela1();
-    auto* theme = System::ThemeManager::getCurrentTheme();
     app->create();
-    app->setBackgroundColor(theme->getWindowBackgroundColor(app->getDisplay(), app->getScreen()));
     app->run();
     return 0;
 }

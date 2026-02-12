@@ -2,7 +2,6 @@
 #include "../include/theme/ThemeManager.h"
 
 namespace System {
-    // DEFINIÇÕES (aqui é o lugar correto!)
     std::string CurrentDesktopEnvironment;
     std::unique_ptr<Theme> ThemeManager::currentTheme = nullptr;
     std::string ThemeManager::currentDesktop;

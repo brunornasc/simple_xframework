@@ -2,6 +2,10 @@
 #include "include/Form.h"
 #include <cstring>
 
+#include "include/theme/Theme.h"
+#include "include/theme/ThemeManager.h"
+#include "include/utils/Utils.h"
+
 namespace System {
 
     Label::~Label() {
@@ -38,7 +42,17 @@ namespace System {
             XSetFont(this->parent->getDisplay(), this->gc, this->fontInfo->fid);
         }
 
-        this->foregroundColor = BlackPixel(this->parent->getDisplay(), this->parent->getScreen());
+        Theme *theme = ThemeManager::getCurrentTheme();
+        XColor xcolor;
+        Utils::parseXColor(&xcolor, theme->getLabelTextColor());
+
+        this->foregroundColor = BlackPixel(this->parent->getDisplay(), this->parent->getScreen()); //fallback
+        auto cmap= DefaultColormap(this->parent->getDisplay(), this->parent->getScreen());
+
+        if (XAllocColor(this->parent->getDisplay(), cmap, &xcolor)) {
+            this->foregroundColor = xcolor.pixel;
+        }
+
         XSetForeground(this->parent->getDisplay(), this->gc, this->foregroundColor);
     }
 

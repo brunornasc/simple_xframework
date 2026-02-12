@@ -13,6 +13,7 @@ add_executable(simple_xframework
         src/include/System.h
         src/include/Types.h
         src/include/Component.h
+        src/include/utils/Utils.h
         teste.cpp
         src/Form.cpp
         src/Label.cpp
@@ -21,7 +22,6 @@ add_executable(simple_xframework
         src/include/theme/ThemeManager.h
         src/include/Button.h
         src/theme/ThemeManager.cpp
-
 )
 
 target_link_libraries(simple_xframework PRIVATE ${X11_LIBRARIES})
