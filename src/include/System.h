@@ -2,13 +2,12 @@
 #include "X11/Xlib.h"
 #include <string>
 #include "Form.h"
+#include "Label.h"
+#include "Button.h"
+#include "theme/ThemeManager.h"
 
 #ifndef SYSTEM_H_
 #define SYSTEM_H_
-
-//__SYSTEM__H
-//AQUI TEMOS A COLEÇÃO DE TODAS AS CLASSES DENTRO DO NAMESPACE SYSTEM
-//INCLUIR #include<system/object.h>
 
 namespace System {
     extern std::string CurrentDesktopEnvironment;
@@ -20,6 +19,8 @@ namespace System {
         } else {
             CurrentDesktopEnvironment = "unknown";
         }
+
+        ThemeManager::initialize();
     }
 }
 

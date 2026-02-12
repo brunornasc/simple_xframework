@@ -16,6 +16,11 @@ add_executable(simple_xframework
         teste.cpp
         src/Form.cpp
         src/Label.cpp
+        src/include/theme/Theme.h
+        src/include/theme/KDETheme.h
+        src/include/theme/ThemeManager.h
+        src/include/Button.h
+        src/theme/ThemeManager.cpp
 
 )
 

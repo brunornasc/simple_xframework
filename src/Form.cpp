@@ -8,10 +8,9 @@
 #include <X11/Xutil.h>
 
 namespace System {
-    std::string CurrentDesktopEnvironment;
 
     void Form::init() {
-        DetectDesktopEnvironment();
+
     }
 
     Form::Form() {
