@@ -9,11 +9,11 @@
 #define BUTTON_H_
 
 namespace System {
-    class Button : public Component {
-        unsigned long buttonBgColor;
-        unsigned long buttonHoverColor;
-        unsigned long buttonTextColor;
-        bool hovered;
+    class Button final : public Component {
+        unsigned long buttonBgColor{};
+        unsigned long buttonHoverColor{};
+        unsigned long buttonTextColor{};
+        bool hovered{};
 
     public:
         EventHandler *onClick = nullptr;
@@ -38,7 +38,7 @@ namespace System {
         void setHover(bool h);
 
         template<typename T>
-        Button(const T *form) {
+        explicit Button(const T *form) {
             this->parent = static_cast<Form *>(const_cast<T *>(form));
             this->pressed = false;
             this->hover = false;
@@ -53,7 +53,7 @@ namespace System {
             this->location->top = 0;
         }
 
-        ~Button();
+        ~Button() override;
     };
 }
 #endif
