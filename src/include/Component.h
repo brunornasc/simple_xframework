@@ -17,8 +17,8 @@ namespace System {
         GC gc;
         XFontStruct *fontInfo;
         std::string text;
-        System::Location *location;
-        System::Size *size;
+        Location *location;
+        Size *size;
         bool pressed;
         bool hover;
 
@@ -26,7 +26,7 @@ namespace System {
         char *color;
         unsigned long foregroundColor;
 
-        virtual ~Component() = default;
+        ~Component() override = default;
         virtual void draw() = 0;
         virtual void create() = 0;
         virtual int getLeft() = 0;
