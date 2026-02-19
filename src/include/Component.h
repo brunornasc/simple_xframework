@@ -4,7 +4,9 @@
 
 #ifndef SIMPLE_XFRAMEWORK_COMPONENT_H
 #define SIMPLE_XFRAMEWORK_COMPONENT_H
+#include <X11/Xlib.h>
 #include "Object.h"
+#include "Types.h"
 
 namespace System {
     class Form;
